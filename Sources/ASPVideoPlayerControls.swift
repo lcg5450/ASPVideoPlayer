@@ -133,6 +133,15 @@ open class ASPBasicControls: UIView, VideoPlayerControls, VideoPlayerSeekControl
 
     open var nextButtonHidden: Bool = true
     open var previousButtonHidden: Bool = true
+    
+    open var timeDurationTintColor: UIColor = .white
+    open var controlButtonTintColor: UIColor = .white
+    open var resizeButtonTintColor: UIColor = .white
+    open var controlButtonBackgroundColor : UIColor = .white
+    open var borderWidth : Int = 1
+    open var resizeButtonClicked : Bool = true
+    
+    
 }
 
 @IBDesignable final public class ASPVideoPlayerControls: ASPBasicControls {
@@ -184,6 +193,66 @@ open class ASPBasicControls: UIView, VideoPlayerControls, VideoPlayerSeekControl
             currentTimeLabel.textColor = tintColor
 
             resizeButton.tintColor = tintColor
+            
+            playPauseButton.layer.borderColor = tintColor.cgColor
+            nextButton.layer.borderColor = tintColor.cgColor
+            previousButton.layer.borderColor = tintColor.cgColor
+        }
+    }
+    
+    public override var timeDurationTintColor: UIColor {
+        didSet {
+            lengthLabel.textColor = timeDurationTintColor
+            currentTimeLabel.textColor = timeDurationTintColor
+        }
+    }
+    
+    public override var controlButtonTintColor: UIColor {
+        didSet {
+            playPauseButton.tintColor = controlButtonTintColor
+            nextButton.tintColor = controlButtonTintColor
+            previousButton.tintColor = controlButtonTintColor
+        }
+    }
+    
+    public override var resizeButtonTintColor: UIColor {
+        didSet {
+            resizeButton.tintColor = resizeButtonTintColor
+        }
+    }
+    
+    public override var controlButtonBackgroundColor: UIColor {
+        didSet {
+            playPauseButton.backgroundColor = controlButtonBackgroundColor
+            nextButton.backgroundColor = controlButtonBackgroundColor
+            previousButton.backgroundColor = controlButtonBackgroundColor
+            
+            
+        }
+    }
+    
+    public override var resizeButtonClicked: Bool {
+        didSet {
+            resizeButton.sendActions(for: .touchUpInside)
+        }
+    }
+    
+    
+    public override var borderWidth: Int {
+        didSet {
+            
+            playPauseButton.layer.borderWidth = CGFloat(borderWidth)
+            playPauseButton.layer.cornerRadius = 0.5 * playPauseButton.frame.width
+           
+            nextButton.layer.borderWidth = CGFloat(borderWidth)
+            nextButton.layer.cornerRadius = 0.5 * playPauseButton.frame.width
+            
+            previousButton.layer.borderWidth = CGFloat(borderWidth)
+            previousButton.layer.cornerRadius = 0.5 * playPauseButton.frame.width
+           
+            playPauseButton.clipsToBounds = true
+            nextButton.clipsToBounds = true
+            previousButton.clipsToBounds = true
         }
     }
 
@@ -199,10 +268,11 @@ open class ASPBasicControls: UIView, VideoPlayerControls, VideoPlayerSeekControl
 
     // MARK: - Private Variables and Constants -
 
-    private let playPauseButton = PlayPauseButton()
-    private let progressSlider = Scrubber()
     private let nextButton = NextButton()
     private let previousButton = PreviousButton()
+    private let playPauseButton = PlayPauseButton()
+    private let progressSlider = Scrubber()
+    
     private let progressLoader = Loader()
     private let resizeButton = ResizeButton()
 
@@ -360,7 +430,7 @@ open class ASPBasicControls: UIView, VideoPlayerControls, VideoPlayerSeekControl
     private func configureInitialControlState() {
         guard let videoPlayerView = videoPlayer else { return }
 
-        progressSlider.isUserInteractionEnabled = true
+        progressSlider.isUserInteractionEnabled = false
 
         lengthLabel.text = timeFormatted(totalSeconds: UInt(videoPlayerView.videoLength))
         currentTimeLabel.text = timeFormatted(totalSeconds: UInt(videoPlayerView.currentTime))
@@ -373,7 +443,13 @@ open class ASPBasicControls: UIView, VideoPlayerControls, VideoPlayerSeekControl
         let minutes = (totalSeconds / 60) % 60
         let hours = totalSeconds / 3600
 
+        if hours == 0 && minutes > 0 && seconds > 0 {
+            return String(format: "%02d:%02d", minutes, seconds)
+        }else if hours == 0 && minutes == 0 && seconds > 0 {
+            return String(format: "%02d:%02d", minutes, seconds)
+        } else {
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+    }
     }
 
     private func commonInit() {
